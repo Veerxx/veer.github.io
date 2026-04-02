@@ -1,166 +1,157 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VeerSec OS</title>
+<title>VeerSec Terminal</title>
 
 <style>
+:root {
+  --bg: #050505;
+  --panel: #0d0d0d;
+  --green: #00ff9c;
+  --text: #b7ffd8;
+  --border: #1a1a1a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
-  margin:0;
-  background:#020202;
-  color:#00ff88;
-  font-family:monospace;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-monospace, monospace;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
-/* TERMINAL BOX */
+/* HEADER */
+.header {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--green);
+}
+
+/* TERMINAL */
 .terminal {
-  width:95%;
-  max-width:900px;
-  height:85vh;
-  background:rgba(0,0,0,0.8);
-  border:1px solid #00ff88;
-  box-shadow:0 0 20px rgba(0,255,136,0.3);
-  padding:20px;
-  overflow:auto;
-  backdrop-filter: blur(6px);
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
-/* INPUT AREA */
-.input-area {
-  display:flex;
-  padding:10px;
+/* INPUT BAR */
+.input-bar {
+  display: flex;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.prompt {
+  margin-right: 8px;
+  color: var(--green);
 }
 
 input {
-  flex:1;
-  background:black;
-  border:none;
-  color:#00ff88;
-  font-size:16px;
-  outline:none;
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  outline: none;
+  font-size: 14px;
 }
-
-/* TEXT */
-.line { margin:6px 0; }
 
 /* MOBILE */
-@media(max-width:600px){
-  .terminal {height:80vh;font-size:13px;}
+@media (max-width: 600px) {
+  .terminal {
+    font-size: 13px;
+    padding: 15px;
+  }
 }
-
 </style>
 </head>
 
 <body>
 
+<div class="header">VeerSec Terminal v1.0</div>
+
 <div class="terminal" id="terminal"></div>
 
-<div class="input-area">
-  <span>> </span>
-  <input id="cmd" autofocus>
+<div class="input-bar">
+  <span class="prompt">></span>
+  <input id="cmd" autofocus />
 </div>
 
 <script>
+const t = document.getElementById("terminal");
+const input = document.getElementById("cmd");
 
-const t=document.getElementById("terminal");
-const i=document.getElementById("cmd");
-
-// typing animation
-function type(text, speed=20){
-  return new Promise(resolve=>{
-    let div=document.createElement("div");
-    div.className="line";
-    t.appendChild(div);
-
-    let i=0;
-    function write(){
-      if(i<text.length){
-        div.innerHTML += text.charAt(i);
-        i++;
-        setTimeout(write,speed);
-      } else resolve();
-    }
-    write();
-  });
+function print(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  t.appendChild(div);
+  t.scrollTop = t.scrollHeight;
 }
 
-// print normal
-function p(text){
-  let d=document.createElement("div");
-  d.className="line";
-  d.innerText=text;
-  t.appendChild(d);
-  t.scrollTop=t.scrollHeight;
-}
+print("Welcome to VeerSec Terminal");
+print("Type 'help' to begin\n");
 
-// boot animation
-async function boot(){
-  await type("Booting VeerSec OS...");
-  await type("Loading modules...");
-  await type("Access Granted ✅");
-  await type("Type 'help' to begin");
-}
-
-boot();
-
-// commands
-i.addEventListener("keydown", e=>{
-  if(e.key==="Enter"){
-    let cmd=i.value.trim();
-    p("> "+cmd);
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    const cmd = input.value.trim();
+    print("> " + cmd);
     run(cmd);
-    i.value="";
+    input.value = "";
   }
 });
 
-function run(cmd){
+function run(cmd) {
+  switch (cmd) {
 
-  if(cmd==="help"){
-    p("Commands:");
-    p("whoami | skills | projects | contact | clear");
-  }
+    case "help":
+      print("whoami | skills | projects | contact | clear");
+      break;
 
-  else if(cmd==="whoami"){
-    p("Veerxx - Cybersecurity Specialist");
-    p("4+ years experience in VAPT");
-  }
+    case "whoami":
+      print("Veerxx — Cybersecurity Specialist");
+      print("4+ years in VAPT");
+      break;
 
-  else if(cmd==="skills"){
-    p("Web Security");
-    p("Network Pentesting");
-    p("Burp Suite | Nmap | Metasploit");
-  }
+    case "skills":
+      print("Web Security");
+      print("Network Pentesting");
+      print("Burp Suite | Nmap | Metasploit");
+      break;
 
-  else if(cmd==="projects"){
-    p("Fetching GitHub...");
-    fetch("https://api.github.com/users/Veerxx/repos")
-    .then(r=>r.json())
-    .then(data=>{
-      data.slice(0,5).forEach(repo=>{
-        p(repo.name + " → " + repo.html_url);
-      });
-    });
-  }
+    case "projects":
+      print("Loading GitHub repos...");
+      fetch("https://api.github.com/users/veersec/repos")
+        .then(res => res.json())
+        .then(data => {
+          data.slice(0,5).forEach(repo => {
+            print(repo.name + " → " + repo.html_url);
+          });
+        });
+      break;
 
-  else if(cmd==="contact"){
-    p("GitHub: https://github.com/Veerxx");
-    p("Add LinkedIn here");
-  }
+    case "contact":
+      print("GitHub: https://github.com/veersec");
+      break;
 
-  else if(cmd==="clear"){
-    t.innerHTML="";
-  }
+    case "clear":
+      t.innerHTML = "";
+      break;
 
-  else{
-    p("Command not found");
+    default:
+      print("Command not found");
   }
 }
-
 </script>
 
 </body>
